@@ -11,6 +11,7 @@ public:
 	void AddClip(Sprite* _sprite);
 	Sprite* GetFrame();
 	Sprite* GetFrameNow();
+	int		GetFrameCount() { return m_clips.size(); }
 	std::vector<Sprite*>& GetClips() { return m_clips; };
 };
 

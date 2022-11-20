@@ -194,6 +194,17 @@ LRESULT TreeViewWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 						Controller::GetInstance()->GetMainWnd()->ClearAnimation();
 					}
 				}
+				else if (ptvkd->wVKey == 83)
+				{
+					TVITEM tvi = { 0 };
+					tvi.hItem = GetCusorSel();
+					TreeView_GetItem(m_treeviewHwnd, &tvi);
+					ResourceObj* rc = (ResourceObj*)tvi.lParam;
+					if (rc)
+					{
+						Controller::GetInstance()->GetMainWnd()->SaveItem(rc);
+					}
+				}
 				break;
 			}
 			}

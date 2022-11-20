@@ -19,6 +19,7 @@ public:
 	void MenuBind(int _menu, UINT& _nowMenu);
 	void KeyDown(WPARAM _param);
 	void ClearAnimation();
+	void SaveItem(ResourceObj* _obj);
 private:
 	void FileOpenProc();
 	void KeyColorErase();

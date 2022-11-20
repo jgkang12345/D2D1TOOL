@@ -743,6 +743,69 @@ void MainWnd::SaveAnimation()
 	}
 }
 
+void MainWnd::SaveItem(ResourceObj* _obj)
+{
+	TCHAR* filePath;
+	filePath = FileSave();
+
+	if (filePath)
+	{
+		FILE* p_file = NULL;
+		char* ptr = NULL;
+		char path[256] = "";
+		char filename[256] = "";
+
+		WideCharToMultiByte(CP_ACP, 0, filePath, 256, path, 256, NULL, NULL);
+		ptr = strrchr(path, '\\');     //문자열(path)의 뒤에서부터 '\'의 위치를 검색하여 반환
+
+		if (ptr == NULL)
+			strcpy_s(filename, path);
+		else
+			strcpy_s(filename, ptr + 1); // 포인터에 +1을 더하여 파일이름만 추출
+
+		if (0 == fopen_s(&p_file, filename, "wb"))
+		{
+			SpriteBinaryFileHeader header;
+			WideCharToMultiByte(CP_ACP, 0, m_bitmap->GetFileName(), 256, header.fileName, 256, NULL, NULL);
+
+			switch (_obj->GetResourceType())
+			{
+			case SPRITE:
+				{
+					header.resourceType = SPRITE;
+					header.spriteCount = 1;
+					SpriteBinaryFileData* binaryStream = new SpriteBinaryFileData();
+					binaryStream->rect = reinterpret_cast<Sprite*>(_obj)->GetRect();
+					binaryStream->pivotPos = reinterpret_cast<Sprite*>(_obj)->GetPivot();
+					fwrite(&header, sizeof(SpriteBinaryFileHeader), 1, p_file);
+					fwrite(binaryStream, sizeof(SpriteBinaryFileData), header.spriteCount, p_file);
+					delete binaryStream;
+					break;			
+				}
+			case ANIMATION:
+				{
+					header.resourceType = ANIMATION;
+					header.spriteCount = reinterpret_cast<Animation*>(_obj)->GetFrameCount();
+					SpriteBinaryFileData* binaryStream = new SpriteBinaryFileData[header.spriteCount];
+
+					for (int i = 0; i < header.spriteCount; i++)
+					{
+						Sprite* s = reinterpret_cast<Animation*>(_obj)->GetClips()[i];
+						SpriteBinaryFileData sf = { s->GetRect(), s->GetPivot() };
+						binaryStream[i] = sf;
+					}
+
+					fwrite(&header, sizeof(SpriteBinaryFileHeader), 1, p_file);
+					fwrite(binaryStream, sizeof(SpriteBinaryFileData), header.spriteCount, p_file);
+					delete[] binaryStream;
+					break;
+				}
+			}
+			fclose(p_file);
+		}
+	}
+}
+
 void MainWnd::LoadSprite()
 {
 	TCHAR* filePath;
