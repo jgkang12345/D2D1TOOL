@@ -90,6 +90,7 @@ Bitmap* D2D1Core::LoadBitmapByFileName(const PCWSTR _fileName)
 	if (pDecoder) pDecoder->Release();
 
 	Bitmap* b = new Bitmap(temp, static_cast<BYTE*>(memory), width, height, 4);
+	b->SetFileName(_fileName);
 	return b;
 }
 
@@ -150,6 +151,7 @@ Bitmap* D2D1Core::LoadBitmapByFileName(ID2D1HwndRenderTarget** _rt, const PCWSTR
 	if (pDecoder) pDecoder->Release();
 
 	Bitmap* b = new Bitmap(temp, static_cast<BYTE*>(memory), width, height, 4);
+	b->SetFileName(_fileName);
 	return b;
 }
 

@@ -388,10 +388,12 @@ void MainWnd::MenuBind(int _menu, UINT& _nowMenu)
 void MainWnd::FileOpenProc()
 {
 	TCHAR* filePath = FileOpen();
+	TCHAR filePathCopy[256];
 	if (filePath)
 	{
-		EraseBitmap();
-		Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, filePath);
+		_tcscpy_s(filePathCopy, filePath);
+		MainWnd::EraseBitmap();
+		Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, filePathCopy);
 	
 		if (bitmap)
 			SetBitmap(bitmap);
@@ -669,7 +671,6 @@ void MainWnd::SaveSprite()
 		char* ptr = NULL;
 		char path[256] = "";
 		char filename[256] = "";
-
 		WideCharToMultiByte(CP_ACP, 0, filePath, 256, path, 256, NULL, NULL);
 		ptr = strrchr(path, '\\');     //문자열(path)의 뒤에서부터 '\'의 위치를 검색하여 반환
 
@@ -681,6 +682,7 @@ void MainWnd::SaveSprite()
 		if (m_targetrectVector.size() != 0 && 0 == fopen_s(&p_file, filename, "wb"))
 		{
 			SpriteBinaryFileHeader header;
+			WideCharToMultiByte(CP_ACP, 0, m_bitmap->GetFileName(), 256, header.fileName, 256, NULL, NULL);
 			header.resourceType = SPRITE;
 			header.spriteCount = m_targetrectVector.size();
 
@@ -722,6 +724,7 @@ void MainWnd::SaveAnimation()
 		if (m_targetrectVector.size() != 0 && 0 == fopen_s(&p_file, filename, "wb"))
 		{
 			SpriteBinaryFileHeader header;
+			WideCharToMultiByte(CP_ACP, 0, m_bitmap->GetFileName(), 256, header.fileName, 256, NULL, NULL);
 			header.resourceType = ANIMATION;
 			header.spriteCount = m_targetrectVector.size();
 
@@ -758,6 +761,22 @@ void MainWnd::LoadSprite()
 			fread(header, sizeof(SpriteBinaryFileHeader), 1, p_file);
 			if (header) 
 			{
+				if (m_bitmap == nullptr)
+				{
+					TCHAR szUniCode[256] = { 0, };
+					MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, header->fileName, strlen(header->fileName), szUniCode, 256);
+					Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, szUniCode);
+
+					if (bitmap)
+						SetBitmap(bitmap);
+
+					RECT size = GetClientSizeRect();
+					SetScrollRange(m_scroll,
+						SB_CTL,
+						0,
+						bitmap->GetHeight() - size.bottom,
+						TRUE);
+				}
 				SpriteBinaryFileData* bStream = new SpriteBinaryFileData[header->spriteCount];
 				fread(bStream, sizeof(SpriteBinaryFileData), header->spriteCount, p_file);
 				switch (header->resourceType)
@@ -794,6 +813,14 @@ void MainWnd::LoadSprite()
 			delete header;
 		}
 	}
+}
+
+void MainWnd::EraseBitmap()
+{
+	m_bitmap = nullptr;
+	delete m_bitmap;
+	m_targetrectVector.clear();
+	ClearAll();
 }
 
 bool MainWnd::CanParse(Sprite* _sprite)

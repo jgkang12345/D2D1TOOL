@@ -33,6 +33,7 @@ private:
 	void SaveSprite();
 	void SaveAnimation();
 	void LoadSprite();
+	void EraseBitmap();
 	bool CanParse(Sprite* _spirte);
 	bool CanSelect(Sprite* _sprite);
 private:
