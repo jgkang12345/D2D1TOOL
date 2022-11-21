@@ -1022,8 +1022,10 @@ LRESULT MainWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		m_startMousePosY = HIWORD(lParam);
 		Pos pos = GetMousePosXY(m_startMousePosX, m_startMousePosY);
 		m_keyColor = GetPosBitmapMemory(pos.x, pos.y);
-		if (m_keyColor != -1)
-			m_pixelPosText->Update(L"pick color %x", m_keyColor);
+		if (m_keyColor == 4294967295)
+			m_pixelPosText->Update(L"pick color FFFFFFFF");
+		else if (m_keyColor != -1)
+			m_pixelPosText->Update(L"pick color %0.8X", m_keyColor);
 		break;
 	}
 
