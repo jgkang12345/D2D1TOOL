@@ -22,4 +22,4 @@
 #include <wincodec.h>
 #include "D2D1Core.h"
 #include "D2D1Wnd.h"
-void HelloWorld();
+void GetFileExp(IN TCHAR* _fileName, OUT TCHAR* _ret);

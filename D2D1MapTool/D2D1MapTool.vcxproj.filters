@@ -7,6 +7,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{b78d6b17-cc54-496d-9807-1c823f2e028d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Wnd">
+      <UniqueIdentifier>{7a10f978-3403-4686-91d4-f43999af8082}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -15,10 +18,26 @@
     <ClCompile Include="D2D1MapTool.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWnd.cpp">
+      <Filter>Wnd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="MainWnd.h">
+      <Filter>Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="D2D1MapTool.rc" />
   </ItemGroup>
 </Project>
