@@ -96,9 +96,11 @@ void MainWnd::Render()
 		D2D1_RECT_F source = D2D1::RectF(0, 0, m_bitmap->GetWidht(), m_bitmap->GetHeight());
 		D2D1_RECT_F dest = D2D1::RectF(0 + m_scrollX, 0 + m_scrollY, m_bitmap->GetWidht() + m_scrollX, m_bitmap->GetHeight() + m_scrollY);
 		m_rt->DrawBitmap(m_bitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
-
-		CreateGrid(16);
 	}
+
+	if (m_gridState)
+		CreateGrid(16);
+
 	m_rt->EndDraw();
 }
 
@@ -110,7 +112,9 @@ void MainWnd::MenuBind(int _menu)
 		ResourceLoad();
 		break;
 
-
+	case ID_TOOL_GRID:
+		m_gridState = !m_gridState;
+		break;
 	default:
 		break;
 	}

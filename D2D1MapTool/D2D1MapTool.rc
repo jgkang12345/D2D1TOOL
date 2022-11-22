@@ -56,6 +56,10 @@ BEGIN
     BEGIN
         MENUITEM "Open",                        ID_FILE_OPEN
     END
+    POPUP "Tool"
+    BEGIN
+        MENUITEM "Grid",                        ID_TOOL_GRID
+    END
 END
 
 #endif    // 한국어(대한민국) resources

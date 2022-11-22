@@ -8,6 +8,10 @@ public:
 	MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow);
 	MainWnd() {};
 	virtual ~MainWnd() {};
+
+private:
+	bool m_gridState = false;
+
 private:
 	void MenuBind(int _menu);
 	void CreateGrid(int _size);
