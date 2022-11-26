@@ -13,6 +13,20 @@ MainWnd::MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _tit
 	Init();
 }
 
+MainWnd::MainWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow)
+{
+	m_instance = _instance;
+	m_className = _className;
+	m_titleName = _title;
+	m_x = _x;
+	m_y = _y;
+	m_width = _width;
+	m_height = _height;
+	m_ncmdShow = _ncmdShow;
+	m_hParent = _parent;
+	Init();
+}
+
 void MainWnd::Init()
 {
 	WNDCLASSEX wecx;
@@ -25,7 +39,7 @@ void MainWnd::Init()
 	wecx.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wecx.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wecx.lpszClassName = m_className;
-	wecx.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
+	wecx.lpszMenuName = MAKEINTRESOURCE(nullptr);
 	wecx.hIconSm = LoadIcon(wecx.hInstance, IDI_APPLICATION);
 	wecx.lpfnWndProc = Wnd::WndProc;  // Á¤ÀûÇÔ¼ö
 	if (!RegisterClassEx(&wecx))
@@ -41,22 +55,21 @@ void MainWnd::Init()
 
 void MainWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int _width, int _height, HINSTANCE _instance)
 {
-	m_hwnd = CreateWindow(
+	m_hwnd = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
 		_className,
-		_titleName,
-		WS_OVERLAPPEDWINDOW,
-		0, 0,
+		NULL,
+		WS_CHILD | WS_VISIBLE,
+		m_x, m_y,
 		_width, _height,
+		m_hParent,
 		NULL,
-		NULL,
-		_instance,
+		GetModuleHandle(NULL),
 		this);
 	D2D1Core::GetInstance()->CreateRenderTarget(m_hwnd, &m_rt);
-	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"³ª´®°íµñ", 30.0f);
+	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"³ª´®°íµñ", 15.0f);
 	SetBrush(D2D1::ColorF::Black);
 	SetBrush(D2D1::ColorF::Red, &m_brush1);
-	ShowWindow(m_hwnd, 10);
-	UpdateWindow(m_hwnd);
 }
 
 
@@ -75,49 +88,14 @@ void MainWnd::Render()
 {
 	m_rt->BeginDraw();
 	m_rt->Clear(D2D1::ColorF(D2D1::ColorF::DarkGray));
-	RECT rc = GetClientSizeRect();
-	if (m_bitmap)
-	{
-		FLOAT width = (float)(rc.right - rc.left);
-		FLOAT height = (float)(rc.bottom - rc.top);
 
-		if (width >= m_bitmap->GetWidht())
-			width = m_bitmap->GetWidht();
-
-		if (height >= m_bitmap->GetHeight())
-			height = m_bitmap->GetHeight();
-
-		int leftPos = 0 + m_scrollX;
-		int topPos = 0 + m_scrollY;
-
-		int rightPos = 0 + width + m_scrollX;
-		int bottomPos = 0 + height + m_scrollY;
-			
-		D2D1_RECT_F source = D2D1::RectF(0, 0, m_bitmap->GetWidht(), m_bitmap->GetHeight());
-		D2D1_RECT_F dest = D2D1::RectF(0 + m_scrollX, 0 + m_scrollY, m_bitmap->GetWidht() + m_scrollX, m_bitmap->GetHeight() + m_scrollY);
-		m_rt->DrawBitmap(m_bitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
-	}
-
-	if (m_gridState)
-		CreateGrid(16);
 
 	m_rt->EndDraw();
 }
 
 void MainWnd::MenuBind(int _menu)
 {
-	switch (_menu)
-	{
-	case ID_FILE_OPEN:
-		ResourceLoad();
-		break;
 
-	case ID_TOOL_GRID:
-		m_gridState = !m_gridState;
-		break;
-	default:
-		break;
-	}
 }
 
 void MainWnd::CreateGrid(int _size)
@@ -128,7 +106,7 @@ void MainWnd::CreateGrid(int _size)
 	for (int i = 0; i < xCount + 1; i++)
 	{
 		D2D1_POINT_2F start = { i * _size, 0 };
-		D2D1_POINT_2F end = { i * _size, cr.bottom };
+		D2D1_POINT_2F end = { i * _size, cr.bottom }; 
 		m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
 	}
 
@@ -188,7 +166,6 @@ LRESULT MainWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_COMMAND:
-		MenuBind(LOWORD(wParam));
 		break;
 	case WM_LBUTTONDOWN:
 		break;
