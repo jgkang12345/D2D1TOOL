@@ -22,4 +22,6 @@
 #include <wincodec.h>
 #include "D2D1Core.h"
 #include "D2D1Wnd.h"
+#include <memory>
 void GetFileExp(IN TCHAR* _fileName, OUT TCHAR* _ret);
+void GetFileList(std::vector<TCHAR*>& _fileList, const TCHAR* _rootPath);

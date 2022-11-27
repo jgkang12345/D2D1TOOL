@@ -14,13 +14,12 @@ public:
 	HTREEITEM   GetCusorSel();
 
 private:
-	static int spriteSq;
-	static int animationSq;
-
-private:
 	HWND	m_treeviewHwnd;
 	HTREEITEM m_spriteRoot;
 	HTREEITEM m_animationRoot;
+	HTREEITEM m_mapRoot;
+	HTREEITEM m_objectRoot;
+	HTREEITEM m_scriptRoot;
 	int		g_nOpen;
 	int		g_nClosed;
 	int		g_nDocument;

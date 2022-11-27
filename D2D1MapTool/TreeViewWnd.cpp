@@ -82,8 +82,18 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 		m_instance,
 		NULL);
 
-	//m_spriteRoot = AddItemToTree(0, (LPTSTR)L"Sprite", NULL, TVI_LAST, NULL);
-	//m_animationRoot = AddItemToTree(0, (LPTSTR)L"Animation", NULL, TVI_LAST, NULL);
+	m_mapRoot = AddItemToTree(0, (LPTSTR)L"Map", NULL, TVI_LAST, NULL);
+	m_objectRoot = AddItemToTree(0, (LPTSTR)L"Object", NULL, TVI_LAST, NULL);
+	m_spriteRoot = AddItemToTree(0, (LPTSTR)L"Sprite", NULL, TVI_LAST, NULL);
+	m_animationRoot = AddItemToTree(0, (LPTSTR)L"Animation", NULL, TVI_LAST, NULL);
+	m_scriptRoot = AddItemToTree(0, (LPTSTR)L"Script", NULL, TVI_LAST, NULL);
+	std::vector<TCHAR*> spriteFiles;
+	GetFileList(spriteFiles, _T("D:\\tt\\*"));
+
+	for (int i = 0; i < spriteFiles.size(); i++)
+		if (spriteFiles[i])
+			delete spriteFiles[i];
+
 }
 
 
