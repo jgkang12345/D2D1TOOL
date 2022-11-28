@@ -6,6 +6,7 @@ private:
 	class Bitmap* m_bitmap;
 public:
 	MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow);
+	MainWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow);
 	MainWnd() {};
 	virtual ~MainWnd() {};
 

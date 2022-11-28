@@ -24,6 +24,12 @@
     <ClCompile Include="MainWnd.cpp">
       <Filter>Wnd</Filter>
     </ClCompile>
+    <ClCompile Include="MainFrameWnd.cpp">
+      <Filter>Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeViewWnd.cpp">
+      <Filter>Wnd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -36,6 +42,12 @@
       <Filter>Wnd</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="MainFrameWnd.h">
+      <Filter>Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeViewWnd.h">
+      <Filter>Wnd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D2D1MapTool.rc" />
