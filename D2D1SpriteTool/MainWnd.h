@@ -20,6 +20,7 @@ public:
 	void KeyDown(WPARAM _param);
 	void ClearAnimation();
 	void SaveItem(ResourceObj* _obj);
+	void CreateBitmap(ResourceObj* _obj);
 private:
 	void FileOpenProc();
 	void KeyColorErase();

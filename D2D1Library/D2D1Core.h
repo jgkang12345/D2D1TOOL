@@ -24,8 +24,7 @@ public:
 	void							SetFontFormat(IDWriteTextFormat** _format, const WCHAR _fontName[], const FLOAT _fontSize);
 	void*							ConvertFrameToBitmap(IWICBitmapFrameDecode* frame);
 	IWICImagingFactory*				GetIWICImangFactory() { return g_pWICFactory; }
-
-
+	void							CreateBitmap(const PCWSTR _fileName, Bitmap* _bitmap, Sprite* _obj);
 	TCHAR*							FileOpen();
 
 

@@ -205,6 +205,17 @@ LRESULT TreeViewWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 						Controller::GetInstance()->GetMainWnd()->SaveItem(rc);
 					}
 				}
+				else if (ptvkd->wVKey == 68)
+				{
+					TVITEM tvi = { 0 };
+					tvi.hItem = GetCusorSel();
+					TreeView_GetItem(m_treeviewHwnd, &tvi);
+					ResourceObj* rc = (ResourceObj*)tvi.lParam;
+					if (rc)
+					{
+						Controller::GetInstance()->GetMainWnd()->CreateBitmap(rc);
+					}
+				}
 				break;
 			}
 			}

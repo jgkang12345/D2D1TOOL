@@ -806,6 +806,29 @@ void MainWnd::SaveItem(ResourceObj* _obj)
 	}
 }
 
+void MainWnd::CreateBitmap(ResourceObj* _obj)
+{
+	switch (_obj->GetResourceType())
+	{
+	case SPRITE:
+		if (m_bitmap)
+		{
+			TCHAR* filePath;
+			filePath = FileSave();
+			TCHAR filePathReal[256];
+			if (filePath == nullptr)
+				return;
+
+			_tcscpy_s(filePathReal, filePath);
+			if (filePathReal)
+			{
+				D2D1Core::GetInstance()->CreateBitmap(filePathReal,m_bitmap,reinterpret_cast<Sprite*>(_obj));
+			}
+		}
+		break;
+	} 
+}
+
 void MainWnd::LoadSprite()
 {
 	TCHAR* filePath;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Bitmap.h"
 #include "D2D1Core.h"
+#include "Sprite.h"
 D2D1Core* D2D1Core::m_instance = nullptr;
 void D2D1Core::Init()
 {
@@ -176,18 +177,18 @@ void D2D1Core::SaveFile(Bitmap* _bitmap, const PCWSTR _fileName)
 		return;
 	}
 
-	g_pWICFactory->CreateStream(&pStream);
+	rs = g_pWICFactory->CreateStream(&pStream);
 	WICPixelFormatGUID format = GUID_WICPixelFormat32bppPBGRA;
-	pStream->InitializeFromFilename(_fileName, GENERIC_WRITE);
-	g_pWICFactory->CreateEncoder(GUID_ContainerFormatPng, NULL, &pEncoder);
-	pEncoder->Initialize(pStream, WICBitmapEncoderNoCache);
-	pEncoder->CreateNewFrame(&pFrameEncode, NULL);
-	pFrameEncode->Initialize(NULL);
-	pFrameEncode->SetSize(widht, height);
-	pFrameEncode->SetPixelFormat(&format);
-	pFrameEncode->WriteSource(pWICBitmap, NULL);
-	pFrameEncode->Commit();
-	pEncoder->Commit();
+	rs = pStream->InitializeFromFilename(_fileName, GENERIC_WRITE);
+	rs = g_pWICFactory->CreateEncoder(GUID_ContainerFormatPng, NULL, &pEncoder);
+	rs = pEncoder->Initialize(pStream, WICBitmapEncoderNoCache);
+	rs = pEncoder->CreateNewFrame(&pFrameEncode, NULL);
+	rs = pFrameEncode->Initialize(NULL);
+	rs = pFrameEncode->SetSize(widht, height);
+	rs = pFrameEncode->SetPixelFormat(&format);
+	rs = pFrameEncode->WriteSource(pWICBitmap, NULL);
+	rs = pFrameEncode->Commit();
+	rs = pEncoder->Commit();
 
 	pWICBitmap->Release();
 	pEncoder->Release();
@@ -233,4 +234,52 @@ void* D2D1Core::ConvertFrameToBitmap(IWICBitmapFrameDecode* frame)
 
 	// return CreateBitmap(width, height, 1, 32, &buffer[0]);
 	return buffer;
+}
+
+void D2D1Core::CreateBitmap(const PCWSTR _fileName, Bitmap* _bitmap, Sprite* _obj)
+{
+	HRESULT hr = S_OK;
+	ID2D1Factory* pD2DFactory = NULL;
+	IWICBitmap* pWICBitmap = NULL;
+	ID2D1RenderTarget* pRT = NULL;
+	IWICBitmapEncoder* pEncoder = NULL;
+	IWICBitmapFrameEncode* pFrameEncode = NULL;
+	IWICStream* pStream = NULL;
+	BYTE* m = _bitmap->GetMemory();
+
+	const int width =	_bitmap->GetWidht();
+	D2D1_RECT_F rect =  _obj->GetRect();
+	const int mWidht = rect.right - rect.left;
+	const int mHeight = rect.bottom - rect.top;
+	BYTE* makeBuf = new BYTE[mWidht * mHeight * 4];
+	int yPos = rect.top;
+	for (int y = 0; y < mHeight; y++)
+	{
+		const int size = rect.left + (yPos++ * width);
+		::memcpy(&makeBuf[y * mWidht * 4], &m[size * 4], mWidht * 4);
+	}
+
+	HRESULT rs = g_pWICFactory->CreateBitmapFromMemory(mWidht, mHeight, GUID_WICPixelFormat32bppPBGRA, mWidht * 4, (mWidht) * (mHeight) * 4, makeBuf, &pWICBitmap);
+
+	if (!pWICBitmap)
+	{
+		return;
+	}
+
+	rs = g_pWICFactory->CreateStream(&pStream);
+	WICPixelFormatGUID format = GUID_WICPixelFormat32bppPBGRA;
+	rs = pStream->InitializeFromFilename(_fileName, GENERIC_WRITE);
+	rs = g_pWICFactory->CreateEncoder(GUID_ContainerFormatPng, NULL, &pEncoder);
+	rs = pEncoder->Initialize(pStream, WICBitmapEncoderNoCache);
+	rs = pEncoder->CreateNewFrame(&pFrameEncode, NULL);
+	rs = pFrameEncode->Initialize(NULL);
+	rs = pFrameEncode->SetSize(mWidht, mHeight);
+	rs = pFrameEncode->SetPixelFormat(&format);
+	rs = pFrameEncode->WriteSource(pWICBitmap, NULL);
+	rs = pFrameEncode->Commit();
+	pEncoder->Commit();
+	pWICBitmap->Release();
+	pEncoder->Release();
+	pFrameEncode->Release();
+	pStream->Release();
 }

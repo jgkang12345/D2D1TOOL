@@ -145,6 +145,9 @@ void MainWnd::ResourceLoad()
 	TCHAR* _filePath = FileOpen();
 	TCHAR filePath[256];
 	TCHAR exp[256];
+	if (_filePath == nullptr)
+		return;
+
 	_tcscpy_s(filePath, _filePath);
 
 	if (filePath)
