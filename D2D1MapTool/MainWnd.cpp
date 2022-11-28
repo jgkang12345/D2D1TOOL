@@ -93,29 +93,87 @@ void MainWnd::Render()
 	m_rt->EndDraw();
 }
 
-void MainWnd::MenuBind(int _menu)
+BOOL MainWnd::NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IParam)
 {
+	switch (message)
+	{
+	case WM_INITDIALOG:
+	{
+		ShowWindow(hwndDig, NULL);
+		UpdateWindow(hwndDig);
+	}
+	case WM_COMMAND:
+	{
+		switch (wParam)
+		{
+		case IDOK:
+		{
+			UINT XSize = GetDlgItemInt(hwndDig, IDC_X, NULL, 100);
+			UINT YSize = GetDlgItemInt(hwndDig, IDC_Y, NULL, 100);
+			// CreateGrid(XSize, YSize, 16);
+			EndDialog(hwndDig, TRUE);
+		}
+		break;
 
+		case IDCANCEL:
+			EndDialog(hwndDig, 0);
+			return TRUE;
+		}
+		InvalidateRect(hwndDig, NULL, TRUE);
+
+	}
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwndDig, &ps);
+		EndPaint(hwndDig, &ps);
+	}
+	}
+	return FALSE;
 }
 
-void MainWnd::CreateGrid(int _size)
+void MainWnd::MenuBind(int _menu)
+{
+	switch (_menu)
+	{
+	case ID_NEW_MAP:
+		DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), m_hwnd, (DLGPROC)NewMapDiallog);
+		break;
+
+
+	default:
+		break;
+	}
+}
+
+void MainWnd::CreateGrid(int _xSize, int _ySzie, int _width)
 {
 	RECT cr = GetClientSizeRect();
-	int yCount = cr.bottom / _size;
-	int xCount = cr.right / _size;
-	for (int i = 0; i < xCount + 1; i++)
-	{
-		D2D1_POINT_2F start = { i * _size, 0 };
-		D2D1_POINT_2F end = { i * _size, cr.bottom }; 
-		m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
-	}
+	int yCount = _xSize;
+	int xCount = _ySzie;
 
-	for (int i = 0; i < yCount + 1; i++)
+
+	for (int y = 0; y < _ySzie - 1; y++) 
 	{
-		D2D1_POINT_2F start = { 0, i * _size };
-		D2D1_POINT_2F end = { cr.right, i * _size };
-		m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
+		for (int x = 0; x < _xSize - 1; x++) 
+		{
+			D2D1_RECT_F rect = { x * _width, y * _width ,((x + 1) * _width), ((y + 1) * _width) };
+			m_rt->DrawRectangle(rect, m_brush);
+		}
 	}
+	//for (int i = 0; i < xCount + 1; i++)
+	//{
+	//	D2D1_POINT_2F start = { i * _size, 0 };
+	//	D2D1_POINT_2F end = { i * _size, cr.bottom }; 
+	//	m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
+	//}
+
+	//for (int i = 0; i < yCount + 1; i++)
+	//{
+	//	D2D1_POINT_2F start = { 0, i * _size };
+	//	D2D1_POINT_2F end = { cr.right, i * _size };
+	//	m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
+	//}
 }
 
 void MainWnd::ResourceLoad()
@@ -135,7 +193,6 @@ void MainWnd::ResourceLoad()
 		if (0 == _tcscmp(exp, _T("spr"))) 
 		{
 			// spirte ¿œ∂ß
-			
 		}
 		else if (0 == _tcscmp(exp, _T("png")))
 		{

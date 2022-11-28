@@ -114,6 +114,7 @@ LRESULT MainFrameWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_COMMAND:
+		m_mainWnd->MenuBind(LOWORD(wParam));
 		break;
 
 	case WM_LBUTTONDOWN:

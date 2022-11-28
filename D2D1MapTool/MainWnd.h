@@ -8,14 +8,14 @@ public:
 	MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow);
 	MainWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow);
 	MainWnd() {};
+	void MenuBind(int _menu);
 	virtual ~MainWnd() {};
 
 private:
 	bool m_gridState = false;
 
 private:
-	void MenuBind(int _menu);
-	void CreateGrid(int _size);
+	void CreateGrid(int _xSize, int _ySzie, int _width);
 	void ResourceLoad();
 public:
 	virtual	LRESULT CALLBACK DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
@@ -23,5 +23,8 @@ public:
 	virtual void			 CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int _width, int _height, HINSTANCE _instance) override;
 	virtual void			 Resize(UINT _width, UINT _height) override;
 	virtual void			 Render() override;
+
+public:
+	static BOOL				NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IParam);
 };
 

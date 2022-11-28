@@ -88,7 +88,23 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 	m_animationRoot = AddItemToTree(0, (LPTSTR)L"Animation", NULL, TVI_LAST, NULL);
 	m_scriptRoot = AddItemToTree(0, (LPTSTR)L"Script", NULL, TVI_LAST, NULL);
 	std::vector<TCHAR*> spriteFiles;
-	GetFileList(spriteFiles, _T("D:\\tt\\*"));
+	
+	GetFileList(spriteFiles, _T("C:\\tt\\*"));
+	TCHAR exp [256];
+	for (auto& fileName : spriteFiles) 
+	{ 
+		GetFileExp(fileName, exp);
+		if (0 == _tcscmp(exp, _T("map"))) 
+		{
+			AddItemToTree(0, (LPTSTR)fileName, m_mapRoot, TVI_LAST, NULL);
+		}
+		else if (0 == _tcscmp(exp, _T("spr")))
+		{
+			AddItemToTree(0, (LPTSTR)fileName, m_spriteRoot, TVI_LAST, NULL);
+		}
+	}
+
+	
 
 	for (int i = 0; i < spriteFiles.size(); i++)
 		if (spriteFiles[i])
