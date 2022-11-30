@@ -2,6 +2,7 @@
 #include "MainWnd.h"
 #include "resource.h"
 #include "Bitmap.h"
+#include "Controller.h"
 MainWnd::MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow)
 {
 	m_instance = _instance;
@@ -66,6 +67,7 @@ void MainWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int 
 		NULL,
 		GetModuleHandle(NULL),
 		this);
+	Controller::GetInstance()->SetMainWnd(this);
 	D2D1Core::GetInstance()->CreateRenderTarget(m_hwnd, &m_rt);
 	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"³ª´®°íµñ", 15.0f);
 	SetBrush(D2D1::ColorF::Black);
@@ -89,6 +91,32 @@ void MainWnd::Render()
 	m_rt->BeginDraw();
 	m_rt->Clear(D2D1::ColorF(D2D1::ColorF::DarkGray));
 
+	if (m_bitmap)
+	{
+		RECT rc;
+		GetClientRect(m_hwnd, &rc);
+		FLOAT width = (float)(rc.right - rc.left);
+		FLOAT height = (float)(rc.bottom - rc.top);
+
+		if (width >= m_bitmap->GetWidht())
+			width = m_bitmap->GetWidht();
+
+		if (height >= m_bitmap->GetHeight())
+			height = m_bitmap->GetHeight();
+
+		int leftPos = 0 + m_scrollX;
+		int topPos = 0 + m_scrollY;
+
+		int rightPos = 0 + width + m_scrollX;
+		int bottomPos = 0 + height + m_scrollY;
+
+		D2D1_RECT_F source = D2D1::RectF(0, 0, m_bitmap->GetWidht(), m_bitmap->GetHeight());
+		D2D1_RECT_F dest = D2D1::RectF(0 + m_scrollX, 0 + m_scrollY, m_bitmap->GetWidht() + m_scrollX, m_bitmap->GetHeight() + m_scrollY);
+		m_rt->DrawBitmap(m_bitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
+	}
+
+	if (m_gridState)
+		GridRender();
 
 	m_rt->EndDraw();
 }
@@ -110,7 +138,9 @@ BOOL MainWnd::NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IP
 		{
 			UINT XSize = GetDlgItemInt(hwndDig, IDC_X, NULL, 100);
 			UINT YSize = GetDlgItemInt(hwndDig, IDC_Y, NULL, 100);
-			// CreateGrid(XSize, YSize, 16);
+			Controller::GetInstance()->GetMainWnd()->GridSet(XSize, YSize, 16);
+			Controller::GetInstance()->GetMainWnd()->FileOpenProc();
+			
 			EndDialog(hwndDig, TRUE);
 		}
 		break;
@@ -132,6 +162,22 @@ BOOL MainWnd::NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IP
 	return FALSE;
 }
 
+void MainWnd::GridSet(int _xSize, int _ySzie, int _width)
+{
+	m_gridXSize = _xSize;
+	m_gridYSize = _ySzie;
+	m_gridWidth = _width;
+	m_gridState = true;
+}
+
+void MainWnd::GridUnSet()
+{
+	m_gridXSize = 0;
+	m_gridYSize = 0;
+	m_gridWidth = 0;
+	m_gridState = false;
+}
+
 void MainWnd::MenuBind(int _menu)
 {
 	switch (_menu)
@@ -140,40 +186,36 @@ void MainWnd::MenuBind(int _menu)
 		DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), m_hwnd, (DLGPROC)NewMapDiallog);
 		break;
 
-
 	default:
 		break;
 	}
 }
 
-void MainWnd::CreateGrid(int _xSize, int _ySzie, int _width)
+void MainWnd::FileOpenProc()
 {
-	RECT cr = GetClientSizeRect();
-	int yCount = _xSize;
-	int xCount = _ySzie;
-
-
-	for (int y = 0; y < _ySzie - 1; y++) 
+	TCHAR* filePath = Wnd::FileOpen();
+	TCHAR filePathCopy[256];
+	if (filePath)
 	{
-		for (int x = 0; x < _xSize - 1; x++) 
+		_tcscpy_s(filePathCopy, filePath);
+		MainWnd::EraseBitmap();
+		Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, filePathCopy);
+
+		if (bitmap)
+			SetBitmap(bitmap);
+	}
+}
+
+void MainWnd::GridRender()
+{
+	for (int y = 0; y < m_gridYSize; y++)
+	{
+		for (int x = 0; x < m_gridXSize; x++)
 		{
-			D2D1_RECT_F rect = { x * _width, y * _width ,((x + 1) * _width), ((y + 1) * _width) };
+			D2D1_RECT_F rect = { x * m_gridWidth, y * m_gridWidth ,((x + 1) * m_gridWidth), ((y + 1) * m_gridWidth) };
 			m_rt->DrawRectangle(rect, m_brush);
 		}
 	}
-	//for (int i = 0; i < xCount + 1; i++)
-	//{
-	//	D2D1_POINT_2F start = { i * _size, 0 };
-	//	D2D1_POINT_2F end = { i * _size, cr.bottom }; 
-	//	m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
-	//}
-
-	//for (int i = 0; i < yCount + 1; i++)
-	//{
-	//	D2D1_POINT_2F start = { 0, i * _size };
-	//	D2D1_POINT_2F end = { cr.right, i * _size };
-	//	m_rt->DrawLine(start, end, m_brush, 1.0f, nullptr);
-	//}
 }
 
 void MainWnd::ResourceLoad()

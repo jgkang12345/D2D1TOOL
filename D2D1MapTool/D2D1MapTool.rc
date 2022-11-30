@@ -56,10 +56,6 @@ BEGIN
     BEGIN
         MENUITEM "New Map",                     ID_NEW_MAP
     END
-    POPUP "Tool"
-    BEGIN
-        MENUITEM "Grid",                        ID_TOOL_GRID
-    END
 END
 
 

@@ -3,6 +3,7 @@
 #include "MainWnd.h"
 #include "TreeViewWnd.h"
 #include "resource.h"
+#include "Controller.h"
 MainFrameWnd::MainFrameWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow)
 {
 	m_instance = _instance;
@@ -56,6 +57,8 @@ void MainFrameWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[],
 	RECT size = GetClientSizeRect();
 	int mainWidth = _width / 7 * 6;
 	int ScrollBarWidth = 15;
+
+	Controller::GetInstance()->SetMainFrameWnd(this);
 	m_treeViewWnd = new TreeViewWnd(m_instance, m_hwnd, L"SUB", L"JGSPRITETOOL", 0, 0, _width - (mainWidth), size.bottom - 50, 0);
 	m_mainWnd = new MainWnd(m_instance,m_hwnd, L"MAIN", L"JGSPRITETOOL", _width - (mainWidth), 0, mainWidth - ScrollBarWidth, size.bottom - 50, 0);
 
@@ -133,8 +136,7 @@ LRESULT MainFrameWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_PAINT:
-		m_mainWnd->Render();
-		m_treeViewWnd->Render();
+		Controller::GetInstance()->Render();
 		break;
 
 	case WM_DESTROY:

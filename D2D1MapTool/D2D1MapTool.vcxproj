@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Controller.h" />
     <ClInclude Include="MainFrameWnd.h" />
     <ClInclude Include="MainWnd.h" />
     <ClInclude Include="pch.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Controller.cpp" />
     <ClCompile Include="D2D1MapTool.cpp" />
     <ClCompile Include="MainFrameWnd.cpp" />
     <ClCompile Include="MainWnd.cpp" />

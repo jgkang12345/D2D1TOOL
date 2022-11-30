@@ -10,6 +10,9 @@
     <Filter Include="Wnd">
       <UniqueIdentifier>{7a10f978-3403-4686-91d4-f43999af8082}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{502eabad-a6f9-4d90-a876-a21bb957b755}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -30,6 +33,9 @@
     <ClCompile Include="TreeViewWnd.cpp">
       <Filter>Wnd</Filter>
     </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -47,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="TreeViewWnd.h">
       <Filter>Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
