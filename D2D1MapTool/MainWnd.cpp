@@ -3,6 +3,8 @@
 #include "resource.h"
 #include "Bitmap.h"
 #include "Controller.h"
+#include "Map.h"
+#include "TreeViewWnd.h"
 MainWnd::MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow)
 {
 	m_instance = _instance;
@@ -138,9 +140,9 @@ BOOL MainWnd::NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IP
 		{
 			UINT XSize = GetDlgItemInt(hwndDig, IDC_X, NULL, 100);
 			UINT YSize = GetDlgItemInt(hwndDig, IDC_Y, NULL, 100);
+			Controller::GetInstance()->GetMainWnd()->GridUnSet();
 			Controller::GetInstance()->GetMainWnd()->GridSet(XSize, YSize, 16);
 			Controller::GetInstance()->GetMainWnd()->FileOpenProc();
-			
 			EndDialog(hwndDig, TRUE);
 		}
 		break;
@@ -168,14 +170,57 @@ void MainWnd::GridSet(int _xSize, int _ySzie, int _width)
 	m_gridYSize = _ySzie;
 	m_gridWidth = _width;
 	m_gridState = true;
+	const int ySize = _ySzie;
+	const int xSize = _xSize;
+	m_mapData = new int* [ySize];
+	for (int i = 0; i < ySize; i++)
+	{
+		m_mapData[i] = new int[xSize];
+		memset(m_mapData[i], 0, xSize * 4);
+	}
 }
 
 void MainWnd::GridUnSet()
 {
+	if (m_mapData)
+	{
+		for (int i = 0; i < m_gridYSize; i++)
+			if (m_mapData[i])
+				delete[] m_mapData[i];
+		
+		delete[] m_mapData;
+	}
+	
 	m_gridXSize = 0;
 	m_gridYSize = 0;
 	m_gridWidth = 0;
 	m_gridState = false;
+}
+
+void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
+{
+	switch (_obj->GetResourceType())
+	{
+	case MAP:
+		EreaseRender();
+		Map* map = reinterpret_cast<Map*>(_obj);
+		GridSet(map->GetXSize(), map->GetYSize(), 16);
+		map->copyMapData(m_mapData);
+
+		if (m_bitmapDB.find(map->GetFileName()) != m_bitmapDB.end())
+			m_bitmap = m_bitmapDB.find(map->GetFileName())->second;
+		else
+		{
+			// TCHAR unicode[256] = { 0, };
+			TCHAR szUniCode[256] = { 0, };
+			// MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, map->GetFileName(), strlen(map->GetFileName()), unicode, strlen(map->GetFileName()));
+			MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, map->GetImgFileName(), strlen(map->GetImgFileName()), szUniCode, strlen(map->GetImgFileName()));
+			Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, szUniCode);
+			m_bitmapDB.insert({ map->GetFileName(), bitmap });
+			m_bitmap = bitmap;
+		}
+		break;
+	}
 }
 
 void MainWnd::MenuBind(int _menu)
@@ -186,7 +231,8 @@ void MainWnd::MenuBind(int _menu)
 		DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), m_hwnd, (DLGPROC)NewMapDiallog);
 		break;
 
-	default:
+	case ID_FILE_SAVEMAP:
+		SaveFile();
 		break;
 	}
 }
@@ -204,6 +250,90 @@ void MainWnd::FileOpenProc()
 		if (bitmap)
 			SetBitmap(bitmap);
 	}
+}
+
+void MainWnd::SaveFile()
+{
+	TCHAR* _filePath = FileSave();
+	TCHAR filePath[256];
+	TCHAR exp[256];
+
+	if (_filePath == nullptr)
+		return;
+
+	_tcscpy_s(filePath, _filePath);
+
+	if (filePath)
+	{
+		GetFileExp(filePath, exp);
+		if (0 == _tcscmp(exp, _T("map")))
+		{
+			MapBinaryFileSave(filePath);
+		}
+		else if (0 == _tcscmp(exp, _T("obj")))
+		{
+			
+		}
+		else
+		{
+
+		}
+	}
+}
+
+void MainWnd::MapBinaryFileSave(TCHAR* _path)
+{
+	FILE* p_file = NULL;
+	char path[256] = "";
+	char fileName[256] = "";
+	char imgFileName[256] = "";
+	char* ptr = NULL;
+	TCHAR szUniCode[256] = {0,};
+	WideCharToMultiByte(CP_ACP, 0, _path, 256, path, 256, NULL, NULL);
+
+	if (m_mapData && m_bitmap != nullptr && 0 == fopen_s(&p_file, path, "wb"))
+	{
+		MapDataBinaryFile mapBinaryFileData;
+		mapBinaryFileData.xSize = m_gridXSize;
+		mapBinaryFileData.ySize = m_gridYSize;
+		strcpy_s(mapBinaryFileData.fileName, path);
+		WideCharToMultiByte(CP_ACP, 0, m_bitmap->GetFileName(), 256, imgFileName, 256, NULL, NULL);
+		strcpy_s(mapBinaryFileData.imgFileName, imgFileName);
+	
+		for (int y = 0; y < m_gridYSize; y++) 
+			for (int x = 0; x < m_gridXSize; x++)
+				mapBinaryFileData.mapData[y][x] = m_mapData[y][x];
+
+		fwrite(&mapBinaryFileData, sizeof(MapDataBinaryFile), 1, p_file);
+		fclose(p_file);
+
+	
+		ptr = strrchr(path, '\\');     //문자열(path)의 뒤에서부터 '\'의 위치를 검색하여 반환
+
+		if (ptr == NULL)
+			strcpy_s(fileName, path);
+		else
+			strcpy_s(fileName, ptr + 1); // 포인터에 +1을 더하여 파일이름만 추출
+
+
+		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, fileName, strlen(fileName), szUniCode, strlen(fileName));
+
+		Map* map = new Map(mapBinaryFileData);
+		HTREEITEM treeItem
+			= 
+			Controller::GetInstance()->
+			GetTreeViewWnd()->
+			AddItemToTree(0, szUniCode, Controller::GetInstance()->GetTreeViewWnd()->GetMapRoot(), TVI_LAST, (LPARAM)map);
+	
+	}
+}
+
+void MainWnd::EreaseRender()
+{
+	GridUnSet();
+	//if (m_bitmap)
+	//	delete m_bitmap;
+	m_bitmap = nullptr;
 }
 
 void MainWnd::GridRender()

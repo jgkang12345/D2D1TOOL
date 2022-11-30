@@ -55,6 +55,7 @@ BEGIN
     POPUP "File"
     BEGIN
         MENUITEM "New Map",                     ID_NEW_MAP
+        MENUITEM "Save Map",                    ID_FILE_SAVEMAP
     END
 END
 

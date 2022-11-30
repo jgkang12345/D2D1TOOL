@@ -42,6 +42,9 @@
     <ClCompile Include="Animation.cpp">
       <Filter>D2D1</Filter>
     </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>D2D1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -75,6 +78,9 @@
       <Filter>D2D1</Filter>
     </ClInclude>
     <ClInclude Include="Animation.h">
+      <Filter>D2D1</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
       <Filter>D2D1</Filter>
     </ClInclude>
   </ItemGroup>

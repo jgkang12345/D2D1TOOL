@@ -4,6 +4,7 @@
 #include "TreeViewWnd.h"
 #include "MainWnd.h"
 #include "Controller.h"
+#include "Map.h"
 #pragma comment(lib,"Comctl32.lib")
 
 TreeViewWnd::TreeViewWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow)
@@ -85,8 +86,6 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 	Controller::GetInstance()->SetTreViewWnd(this);
 	m_mapRoot = AddItemToTree(0, (LPTSTR)L"Map", NULL, TVI_LAST, NULL);
 	m_objectRoot = AddItemToTree(0, (LPTSTR)L"Object", NULL, TVI_LAST, NULL);
-	m_spriteRoot = AddItemToTree(0, (LPTSTR)L"Sprite", NULL, TVI_LAST, NULL);
-	m_animationRoot = AddItemToTree(0, (LPTSTR)L"Animation", NULL, TVI_LAST, NULL);
 	m_scriptRoot = AddItemToTree(0, (LPTSTR)L"Script", NULL, TVI_LAST, NULL);
 	std::vector<TCHAR*> spriteFiles;
 	
@@ -97,19 +96,16 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 		GetFileExp(fileName, exp);
 		if (0 == _tcscmp(exp, _T("map"))) 
 		{
-			AddItemToTree(0, (LPTSTR)fileName, m_mapRoot, TVI_LAST, NULL);
+			LoadMapData(fileName);
 		}
-		else if (0 == _tcscmp(exp, _T("spr")))
+		else if (0 == _tcscmp(exp, _T("obj")))
 		{
-			AddItemToTree(0, (LPTSTR)fileName, m_spriteRoot, TVI_LAST, NULL);
+			AddItemToTree(0, (LPTSTR)fileName, m_objectRoot, TVI_LAST, NULL);
 		}
 	}
-
-
 	for (int i = 0; i < spriteFiles.size(); i++)
 		if (spriteFiles[i])
 			delete spriteFiles[i];
-
 }
 
 
@@ -133,6 +129,25 @@ void TreeViewWnd::Render()
 HTREEITEM TreeViewWnd::GetCusorSel()
 {
 	return (HTREEITEM)SendMessage(m_treeviewHwnd, TVM_GETNEXTITEM, TVGN_CARET, NULL);
+}
+
+void TreeViewWnd::LoadMapData(TCHAR* _fileName)
+{
+	FILE* p_file = NULL;
+	char path[256] = "";
+	WideCharToMultiByte(CP_ACP, 0, _fileName, 256, path, 256, NULL, NULL);
+	fopen_s(&p_file, path, "rb");
+	if (p_file != NULL)
+	{
+		MapDataBinaryFile* file = new MapDataBinaryFile;
+		fread(file, sizeof(MapDataBinaryFile), 1, p_file);
+		if (file)
+		{
+			Map* map = new Map(*file);
+			AddItemToTree(0, (LPTSTR)_fileName, m_mapRoot, TVI_LAST, (LPARAM)map);
+		}
+		delete file;
+	}
 }
 
 LRESULT TreeViewWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -179,14 +194,12 @@ LRESULT TreeViewWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			case NM_DBLCLK:
 			{
-				//TVITEM tvi = { 0 };
-				//tvi.hItem = GetCusorSel();
-				//TreeView_GetItem(m_treeviewHwnd, &tvi);
-				//ResourceObj* rc = (ResourceObj*)tvi.lParam;
-				//if (rc)
-				//{
-				//	Controller::GetInstance()->GetPreViewWnd()->SetSprite(rc, Controller::GetInstance()->GetMainWnd()->GetBitmap());
-				//}
+				TVITEM tvi = { 0 };
+				tvi.hItem = GetCusorSel();
+				TreeView_GetItem(m_treeviewHwnd, &tvi);
+				ResourceObj* rc = (ResourceObj*)tvi.lParam;
+				if (rc)
+					Controller::GetInstance()->GetMainWnd()->TreeViewClickEventBind(rc);
 			}
 			case TVN_ITEMCHANGING:
 			{

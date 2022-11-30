@@ -25,3 +25,23 @@ struct SpriteBinaryFileData
 	D2D1_RECT_F		rect;
 	D2D1_POINT_2F	pivotPos;
 };
+
+
+struct MapDataBinaryFile
+{
+	char imgFileName[256];
+	char fileName[256];
+	int xSize;
+	int ySize;
+	int mapData[256][256];
+}; 
+
+struct ObjDataBinaryFile
+{
+	char fileName[256];
+	int  xPos;
+	int  yPos;
+	int  width;
+	int  height;
+	int  objectCode;
+};

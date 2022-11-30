@@ -8,11 +8,11 @@ public:
 public:
 	HTREEITEM 	AddItemToTree(int TVID, LPTSTR _lpszItem, HTREEITEM hParent, HTREEITEM hInsAfter, LPARAM data);
 	void		Render();
-	HTREEITEM	GetSpriteRoot() { return m_spriteRoot; }
-	HTREEITEM	GetAnimationRoot() { return m_animationRoot; }
+	HTREEITEM	GetObjectRoot() { return m_objectRoot; }
+	HTREEITEM	GetMapRoot() { return m_mapRoot; }
 	HWND		GetTreeViewHwnd() { return m_treeviewHwnd; }
 	HTREEITEM   GetCusorSel();
-
+	void		LoadMapData(TCHAR* _fileName);
 private:
 	HWND	m_treeviewHwnd;
 	HTREEITEM m_spriteRoot;

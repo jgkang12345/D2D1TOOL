@@ -76,20 +76,6 @@ void MainFrameWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[],
 		m_instance,
 		NULL);
 
-	HWND x_scroll = CreateWindowEx(
-		0,
-		L"SCROLLBAR",
-		NULL,
-		WS_VISIBLE | WS_CHILD | SBS_HORZ,
-		_width - (mainWidth) + 1,
-		size.bottom - 50,
-		_width - (mainWidth)+mainWidth - 290,
-		ScrollBarWidth,
-		m_hwnd,
-		(HMENU)NULL,
-		m_instance,
-		NULL);
-
 	ShowWindow(m_hwnd, SW_MAXIMIZE);
 	UpdateWindow(m_hwnd);
 }

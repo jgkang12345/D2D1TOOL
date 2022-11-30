@@ -3,6 +3,7 @@ enum RESOURCE_TYPE : int
 {
 	SPRITE = 0,
 	ANIMATION = 1,
+	MAP = 3,
 };
 
 class ResourceObj
