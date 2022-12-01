@@ -13,10 +13,12 @@ private:
 	ID2D1HwndRenderTarget*			g_pD2D1RenderTarget;
 	IDWriteFactory*					g_pD2D1DWriteFactory;
 	IWICImagingFactory*				g_pWICFactory;
+	ID2D1BitmapRenderTarget*		g_pCompatibleRenderTarget;
 	static	D2D1Core*				m_instance;
 public:
 	void							Init();
 	void							CreateRenderTarget(HWND _hwnd, ID2D1HwndRenderTarget** _rt);
+	void							CreateRenderTarget(ID2D1HwndRenderTarget* _rt, ID2D1BitmapRenderTarget** _crt);
 	static				  D2D1Core* GetInstance();
 	Bitmap*							LoadBitmapByFileName(const PCWSTR _fileName);
 	Bitmap*							LoadBitmapByFileName(ID2D1HwndRenderTarget** _rt, const PCWSTR _fileName);

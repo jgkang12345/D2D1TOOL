@@ -27,6 +27,11 @@ void D2D1Core::CreateRenderTarget(HWND _hwnd, ID2D1HwndRenderTarget** _rt)
 	);
 }
 
+void D2D1Core::CreateRenderTarget(ID2D1HwndRenderTarget* _rt, ID2D1BitmapRenderTarget** _crt)
+{
+	_rt->CreateCompatibleRenderTarget(_crt);
+}
+
 D2D1Core* D2D1Core::GetInstance()
 {
 	if (m_instance == nullptr)

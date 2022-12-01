@@ -57,6 +57,12 @@ BEGIN
         MENUITEM "New Map",                     ID_NEW_MAP
         MENUITEM "Save Map",                    ID_FILE_SAVEMAP
     END
+    POPUP "Tool"
+    BEGIN
+        MENUITEM "100%",                        ID_TOOL_100
+        MENUITEM "200%",                        ID_TOOL_200
+        MENUITEM "400%",                        ID_TOOL_400
+    END
 END
 
 

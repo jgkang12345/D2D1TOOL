@@ -71,6 +71,7 @@ void MainWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int 
 		this);
 	Controller::GetInstance()->SetMainWnd(this);
 	D2D1Core::GetInstance()->CreateRenderTarget(m_hwnd, &m_rt);
+	D2D1Core::GetInstance()->CreateRenderTarget(m_rt, &m_brt);
 	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"나눔고딕", 15.0f);
 	SetBrush(D2D1::ColorF::Black);
 	SetBrush(D2D1::ColorF::Red, &m_brush1);
@@ -90,9 +91,9 @@ void MainWnd::Resize(UINT _width, UINT _height)
 
 void MainWnd::Render()
 {
-	m_rt->BeginDraw();
-	m_rt->Clear(D2D1::ColorF(D2D1::ColorF::DarkGray));
-
+	m_brt->BeginDraw();
+	m_brt->Clear(D2D1::ColorF(D2D1::ColorF::DarkGray));
+	ID2D1Bitmap* bitmap;
 	if (m_bitmap)
 	{
 		RECT rc;
@@ -114,11 +115,21 @@ void MainWnd::Render()
 
 		D2D1_RECT_F source = D2D1::RectF(0, 0, m_bitmap->GetWidht(), m_bitmap->GetHeight());
 		D2D1_RECT_F dest = D2D1::RectF(0 + m_scrollX, 0 + m_scrollY, m_bitmap->GetWidht() + m_scrollX, m_bitmap->GetHeight() + m_scrollY);
-		m_rt->DrawBitmap(m_bitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
+		m_brt->DrawBitmap(m_bitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
 	}
+
 
 	if (m_gridState)
 		GridRender();
+
+	m_brt->SetTransform(D2D1::Matrix3x2F::Scale(D2D1::Size(m_magnification, m_magnification)));
+	m_brt->EndDraw();
+	m_brt->GetBitmap(&bitmap);
+
+	m_rt->BeginDraw();
+
+	if (bitmap)
+		m_rt->DrawBitmap(bitmap);
 
 	m_rt->EndDraw();
 }
@@ -208,16 +219,30 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 		map->copyMapData(m_mapData);
 
 		if (m_bitmapDB.find(map->GetFileName()) != m_bitmapDB.end())
+		{
 			m_bitmap = m_bitmapDB.find(map->GetFileName())->second;
+
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
+		}
 		else
 		{
-			// TCHAR unicode[256] = { 0, };
 			TCHAR szUniCode[256] = { 0, };
-			// MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, map->GetFileName(), strlen(map->GetFileName()), unicode, strlen(map->GetFileName()));
 			MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, map->GetImgFileName(), strlen(map->GetImgFileName()), szUniCode, strlen(map->GetImgFileName()));
 			Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, szUniCode);
 			m_bitmapDB.insert({ map->GetFileName(), bitmap });
 			m_bitmap = bitmap;
+
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
 		}
 		break;
 	}
@@ -234,6 +259,48 @@ void MainWnd::MenuBind(int _menu)
 	case ID_FILE_SAVEMAP:
 		SaveFile();
 		break;
+
+
+	case ID_TOOL_100:
+		m_magnification = 1.0f;
+		if (m_bitmap)
+		{
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
+		}
+		break;
+
+
+	case ID_TOOL_200:
+		m_magnification = 2.0f;
+		if (m_bitmap)
+		{
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
+		}
+		break;
+
+
+	case ID_TOOL_400:
+		m_magnification = 4.0f;
+		if (m_bitmap)
+		{
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
+		}
+		break;
 	}
 }
 
@@ -248,7 +315,16 @@ void MainWnd::FileOpenProc()
 		Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, filePathCopy);
 
 		if (bitmap)
+		{
 			SetBitmap(bitmap);
+
+			RECT size = GetClientSizeRect();
+			SetScrollRange(m_scroll,
+				SB_CTL,
+				0,
+				(bitmap->GetHeight() * m_magnification) - (size.bottom),
+				TRUE);
+		}
 	}
 }
 
@@ -278,6 +354,73 @@ void MainWnd::SaveFile()
 		{
 
 		}
+	}
+}
+
+
+void MainWnd::Vscroll(WPARAM wParam, LPARAM lParam)
+{
+	int xDelta = 0;
+	int yDelta;     // yDelta = new_pos - current_pos 
+	int yNewPos;    // new position 
+	SCROLLINFO si;
+
+	if (m_bitmap)
+	{
+		switch (LOWORD(wParam))
+		{
+			// User clicked the scroll bar shaft above the scroll box. 
+		case SB_PAGEUP:
+			yNewPos = m_scrollY + 16;
+			break;
+
+			// User clicked the scroll bar shaft below the scroll box. 
+		case SB_PAGEDOWN:
+			yNewPos = m_scrollY - 16;
+			break;
+
+			// User clicked the top arrow. 
+		case SB_LINEUP:
+			yNewPos = m_scrollY + 16;
+			break;
+
+			// User clicked the bottom arrow. 
+		case SB_LINEDOWN:
+			yNewPos = m_scrollY - 16;
+			break;
+
+			// User dragged the scroll box. 
+		case SB_THUMBPOSITION:
+			yNewPos = HIWORD(wParam) * -1;
+			break;
+
+		default:
+			yNewPos = m_scrollY;
+		}
+
+		RECT rect;
+		GetClientRect(m_hwnd, &rect);
+		const int maxHeight = (m_bitmap->GetHeight() * m_magnification) -rect.bottom;
+
+		// New position must be between 0 and the screen height. 
+		yNewPos = max(-1 * maxHeight, yNewPos);
+		yNewPos = min(0, yNewPos);
+
+		// If the current position does not change, do not scroll.
+		if (yNewPos == m_scrollY)
+			return;
+
+
+		// Determine the amount scrolled (in pixels). 
+		yDelta = yNewPos - m_scrollY;
+
+		// Reset the current scroll position. 
+		m_scrollY = yNewPos;
+
+		SetScrollPos(m_scroll,        // 스크롤 바의 윈도우 핸들 
+			SB_CTL,               // 메인 윈도우에 부착된 표준 스크롤바 또는 별도의 스크롤바(SB_CTL) 지정 
+			-1 * m_scrollY,               // 스크롤박스의 위치
+			TRUE);      // 스크롤바의 범위를 변경한 후 다시 그릴 것인지 여부
 	}
 }
 
@@ -331,19 +474,20 @@ void MainWnd::MapBinaryFileSave(TCHAR* _path)
 void MainWnd::EreaseRender()
 {
 	GridUnSet();
-	//if (m_bitmap)
-	//	delete m_bitmap;
 	m_bitmap = nullptr;
 }
 
 void MainWnd::GridRender()
 {
+	RECT size = GetClientSizeRect();
+	
+
 	for (int y = 0; y < m_gridYSize; y++)
 	{
 		for (int x = 0; x < m_gridXSize; x++)
-		{
-			D2D1_RECT_F rect = { x * m_gridWidth, y * m_gridWidth ,((x + 1) * m_gridWidth), ((y + 1) * m_gridWidth) };
-			m_rt->DrawRectangle(rect, m_brush);
+		{			
+			D2D1_RECT_F rect = { (x * m_gridWidth) + m_scrollX, (y * m_gridWidth) + m_scrollY ,((x + 1) * m_gridWidth) + m_scrollX, ((y + 1) * m_gridWidth)+m_scrollY };
+			m_brt->DrawRectangle(rect, m_brush);
 		}
 	}
 }
@@ -371,6 +515,49 @@ void MainWnd::ResourceLoad()
 			// png 일떄 
 			m_bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, filePath);
 		}
+	}
+}
+
+
+void MainWnd::MouseWheel(WPARAM wParam, LPARAM lParam)
+{
+	if (m_bitmap)
+	{
+		if ((SHORT)HIWORD(wParam) > 0)
+		{
+			m_scrollY += 16;
+		}
+		else
+		{
+			m_scrollY -= 16;
+		}
+
+		RECT rect;
+		GetClientRect(m_hwnd, &rect);
+		const int maxHeight = (m_bitmap->GetHeight() * m_magnification) - rect.bottom;
+
+		m_scrollY = max(-1 * maxHeight, m_scrollY);
+		m_scrollY = min(0, m_scrollY);
+
+		SetScrollPos(m_scroll,        // 스크롤 바의 윈도우 핸들 
+			SB_CTL,               // 메인 윈도우에 부착된 표준 스크롤바 또는 별도의 스크롤바(SB_CTL) 지정 
+			-1 * m_scrollY,               // 스크롤박스의 위치
+			TRUE);      // 스크롤바의 범위를 변경한 후 다시 그릴 것인지 여부
+	}
+
+}
+
+void MainWnd::KeyDown(WPARAM _param)
+{
+	switch (_param)
+	{
+	case VK_LEFT:
+		m_scrollX -= 16;
+		break;
+
+	case VK_RIGHT:
+		m_scrollX += 16;
+		break;
 	}
 }
 
@@ -409,6 +596,7 @@ LRESULT MainWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_MOUSEWHEEL:
+		MouseWheel(wParam, lParam);
 		break;
 
 	case WM_VSCROLL:

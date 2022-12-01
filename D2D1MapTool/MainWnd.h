@@ -16,6 +16,9 @@ private:
 	UINT m_gridWidth;
 	int** m_mapData;
 	std::map<char*, Bitmap*> m_bitmapDB;
+	ID2D1BitmapRenderTarget* m_brt;
+	HWND  m_scroll;
+	FLOAT m_magnification = 1.0f;
 private:
 	void GridRender();
 	void ResourceLoad();	
@@ -34,4 +37,9 @@ public:
 	void					 GridSet(int _xSize, int _ySzie, int _width);
 	void					 GridUnSet();
 	void					 TreeViewClickEventBind(ResourceObj* _obj);
-};
+	void					 SetScroll(HWND _hwnd) { m_scroll = _hwnd; }
+	void					 Vscroll(WPARAM wParam, LPARAM lParam);
+	void					 MouseWheel(WPARAM wParam, LPARAM lParam);
+	void					 KeyDown(WPARAM _param);
+}
+;

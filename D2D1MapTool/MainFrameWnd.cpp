@@ -38,6 +38,7 @@ void MainFrameWnd::Init()
 			NULL);
 		return;
 	}
+	//CWnd::CreateWnd(m_className, m_titleName, m_width, m_height, m_instance);
 	CreateWnd(m_className, m_titleName, m_width, m_height, m_instance);
 }
 
@@ -76,6 +77,7 @@ void MainFrameWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[],
 		m_instance,
 		NULL);
 
+	m_mainWnd->SetScroll(y_scroll);
 	ShowWindow(m_hwnd, SW_MAXIMIZE);
 	UpdateWindow(m_hwnd);
 }
@@ -94,6 +96,7 @@ LRESULT MainFrameWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_KEYDOWN:
+		Controller::GetInstance()->KeyDown(wParam);
 		break;
 
 	case WM_TIMER:
@@ -119,6 +122,7 @@ LRESULT MainFrameWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_VSCROLL:
+		Controller::GetInstance()->Vscroll(wParam, lParam);
 		break;
 
 	case WM_PAINT:

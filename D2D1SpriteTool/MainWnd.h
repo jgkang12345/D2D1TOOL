@@ -8,6 +8,7 @@ private:
 	Text* m_pixelPosText;
 	DWORD m_keyColor;
 	HWND  m_scroll;
+
 public:
 	MainWnd(HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow);
 	MainWnd() {};
