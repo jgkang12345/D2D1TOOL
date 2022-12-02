@@ -75,7 +75,7 @@ void MainWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int 
 	D2D1Core::GetInstance()->CreateRenderTarget(m_rt, &m_brt);
 	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"³ª´®°íµñ", 15.0f);
 	SetBrush(D2D1::ColorF::Black);
-	SetBrush(D2D1::ColorF(D2D1::ColorF::Red, 0.3f), &m_brush1);
+	SetBrush(D2D1::ColorF(D2D1::ColorF::Red, 0.6f), &m_brush1);
 	SetBrush(D2D1::ColorF::CadetBlue, &m_brush2);
 }
 
