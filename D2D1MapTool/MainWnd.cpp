@@ -226,7 +226,7 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) -size.bottom) / m_magnification,
 				TRUE);
 		}
 		else
@@ -241,7 +241,7 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 		break;
@@ -269,7 +269,7 @@ void MainWnd::MenuBind(int _menu)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 		break;
@@ -283,7 +283,7 @@ void MainWnd::MenuBind(int _menu)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 		break;
@@ -297,7 +297,7 @@ void MainWnd::MenuBind(int _menu)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(m_bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 		break;
@@ -322,7 +322,7 @@ void MainWnd::FileOpenProc()
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				(bitmap->GetHeight() * m_magnification) - (size.bottom),
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 	}
@@ -400,7 +400,7 @@ void MainWnd::Vscroll(WPARAM wParam, LPARAM lParam)
 
 		RECT rect;
 		GetClientRect(m_hwnd, &rect);
-		const int maxHeight = (m_bitmap->GetHeight() * m_magnification) -rect.bottom;
+		const int maxHeight = ((m_bitmap->GetHeight() * m_magnification) - rect.bottom) / m_magnification;
 
 		// New position must be between 0 and the screen height. 
 		yNewPos = max(-1 * maxHeight, yNewPos);
@@ -534,7 +534,7 @@ void MainWnd::MouseWheel(WPARAM wParam, LPARAM lParam)
 
 		RECT rect;
 		GetClientRect(m_hwnd, &rect);
-		const int maxHeight = (m_bitmap->GetHeight() * m_magnification) - rect.bottom;
+		const int maxHeight = ((m_bitmap->GetHeight() * m_magnification) - rect.bottom) / m_magnification;
 
 		m_scrollY = max(-1 * maxHeight, m_scrollY);
 		m_scrollY = min(0, m_scrollY);
@@ -552,11 +552,19 @@ void MainWnd::KeyDown(WPARAM _param)
 	switch (_param)
 	{
 	case VK_LEFT:
-		m_scrollX -= 16;
+		m_scrollX += 16;
 		break;
 
 	case VK_RIGHT:
-		m_scrollX += 16;
+		m_scrollX -= 16;
+		break;
+
+	case VK_UP:
+		m_scrollY += 16;
+		break;
+
+	case VK_DOWN:
+		m_scrollY -= 16;
 		break;
 	}
 }
