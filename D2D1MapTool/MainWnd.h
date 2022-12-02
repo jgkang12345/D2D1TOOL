@@ -26,6 +26,10 @@ private:
 	void SaveFile();
 	void MapBinaryFileSave(TCHAR* _path);
 	void EreaseRender();
+	void ClickEvent(int _x, int _y);
+	void EventHandler(class Event* _obj, const Pos& _pos);
+	Pos  GetMousePosXY(int _x, int _y);
+	Pos  GetMousePosXYMap(int _x, int _y);
 public:
 	virtual	LRESULT CALLBACK DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
 	virtual	void			 Init() override;

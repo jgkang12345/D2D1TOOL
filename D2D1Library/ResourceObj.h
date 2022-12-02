@@ -3,6 +3,7 @@ enum RESOURCE_TYPE : int
 {
 	SPRITE = 0,
 	ANIMATION = 1,
+	EVENT = 2,
 	MAP = 3,
 };
 

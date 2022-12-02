@@ -5,6 +5,7 @@
 #include "Controller.h"
 #include "Map.h"
 #include "TreeViewWnd.h"
+#include "Event.h"
 MainWnd::MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow)
 {
 	m_instance = _instance;
@@ -74,7 +75,8 @@ void MainWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], int 
 	D2D1Core::GetInstance()->CreateRenderTarget(m_rt, &m_brt);
 	D2D1Core::GetInstance()->SetFontFormat(&m_textFormat, L"³ª´®°íµñ", 15.0f);
 	SetBrush(D2D1::ColorF::Black);
-	SetBrush(D2D1::ColorF::Red, &m_brush1);
+	SetBrush(D2D1::ColorF(D2D1::ColorF::Red, 0.3f), &m_brush1);
+	SetBrush(D2D1::ColorF::CadetBlue, &m_brush2);
 }
 
 
@@ -209,10 +211,11 @@ void MainWnd::GridUnSet()
 }
 
 void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
-{
+{	
 	switch (_obj->GetResourceType())
 	{
 	case MAP:
+	{
 		EreaseRender();
 		Map* map = reinterpret_cast<Map*>(_obj);
 		GridSet(map->GetXSize(), map->GetYSize(), 16);
@@ -226,7 +229,7 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 			SetScrollRange(m_scroll,
 				SB_CTL,
 				0,
-				((m_bitmap->GetHeight() * m_magnification) -size.bottom) / m_magnification,
+				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
 		else
@@ -244,6 +247,10 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 				((m_bitmap->GetHeight() * m_magnification) - size.bottom) / m_magnification,
 				TRUE);
 		}
+		break;
+	}
+
+	case EVENT:
 		break;
 	}
 }
@@ -477,6 +484,43 @@ void MainWnd::EreaseRender()
 	m_bitmap = nullptr;
 }
 
+void MainWnd::ClickEvent(int _x, int _y)
+{
+	if (m_mapData == nullptr)
+		return;
+	Pos mapIndex = GetMousePosXYMap(_x, _y);
+
+	if (mapIndex.x < 0 || mapIndex.y < 0 || mapIndex.x >= m_gridXSize || mapIndex.y >= m_gridYSize)
+		return;
+
+	TVITEM tvi = { 0 };	
+	tvi.hItem = Controller::GetInstance()->GetTreeViewWnd()->GetCusorSel();
+	TreeView_GetItem(Controller::GetInstance()->GetTreeViewWnd()->GetTreeViewHwnd(), &tvi);
+	ResourceObj* rs = (ResourceObj*)tvi.lParam;
+
+	switch (rs->GetResourceType())
+	{
+	case EVENT:
+		Event* eventObject = reinterpret_cast<Event*>(rs);
+		EventHandler(eventObject, mapIndex);
+		break;
+	} 
+}
+
+void MainWnd::EventHandler(Event* _eventObj, const Pos& _pos)
+{
+	switch (_eventObj->GetEventType())
+	{
+	case EMPTY:
+		m_mapData[_pos.y][_pos.x] = EMPTY;
+		break;
+		
+	case WALL:
+		m_mapData[_pos.y][_pos.x] = WALL;
+		break;
+	} 
+}
+
 void MainWnd::GridRender()
 {
 	RECT size = GetClientSizeRect();
@@ -487,6 +531,17 @@ void MainWnd::GridRender()
 		for (int x = 0; x < m_gridXSize; x++)
 		{			
 			D2D1_RECT_F rect = { (x * m_gridWidth) + m_scrollX, (y * m_gridWidth) + m_scrollY ,((x + 1) * m_gridWidth) + m_scrollX, ((y + 1) * m_gridWidth)+m_scrollY };
+
+			switch (m_mapData[y][x])
+			{
+
+			case EMPTY:
+				break;
+
+			case WALL:
+				m_brt->FillRectangle(rect, m_brush1);
+				break;
+			}
 			m_brt->DrawRectangle(rect, m_brush);
 		}
 	}
@@ -547,6 +602,21 @@ void MainWnd::MouseWheel(WPARAM wParam, LPARAM lParam)
 
 }
 
+Pos MainWnd::GetMousePosXY(int _x, int _y)
+{
+	int x = (_x / m_magnification) - m_scrollX;
+	int y = (_y / m_magnification) - m_scrollY;
+	return { x, y };
+}
+
+Pos MainWnd::GetMousePosXYMap(int _x, int _y)
+{
+	int x = ((_x / m_magnification) - m_scrollX) / 16;
+	int y = ((_y / m_magnification) - m_scrollY) / 16;
+	return { x, y };
+}
+
+
 void MainWnd::KeyDown(WPARAM _param)
 {
 	switch (_param)
@@ -595,8 +665,10 @@ LRESULT MainWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		break;
 	case WM_LBUTTONDOWN:
+	{
+		ClickEvent(LOWORD(lParam), HIWORD(lParam));
 		break;
-
+	}
 	case WM_MOUSEMOVE:
 		break;
 

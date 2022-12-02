@@ -5,6 +5,7 @@
 #include "MainWnd.h"
 #include "Controller.h"
 #include "Map.h"
+#include "Event.h"
 #pragma comment(lib,"Comctl32.lib")
 
 TreeViewWnd::TreeViewWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow)
@@ -87,6 +88,13 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 	m_mapRoot = AddItemToTree(0, (LPTSTR)L"Map", NULL, TVI_LAST, NULL);
 	m_objectRoot = AddItemToTree(0, (LPTSTR)L"Object", NULL, TVI_LAST, NULL);
 	m_scriptRoot = AddItemToTree(0, (LPTSTR)L"Script", NULL, TVI_LAST, NULL);
+
+	Event* emptyEvent = new Event(EMPTY);
+	Event* wallEvent = new Event(WALL);
+
+	AddItemToTree(0, (LPTSTR)L"EMPTY_EVENT", m_scriptRoot, TVI_LAST, (LPARAM)emptyEvent);
+	AddItemToTree(0, (LPTSTR)L"WALL EVENT", m_scriptRoot, TVI_LAST, (LPARAM)wallEvent);
+
 	std::vector<TCHAR*> spriteFiles;
 	
 	GetFileList(spriteFiles, _T("*"));
