@@ -5,6 +5,7 @@ enum RESOURCE_TYPE : int
 	ANIMATION = 1,
 	EVENT = 2,
 	MAP = 3,
+	GAME_OBJECT = 4
 };
 
 class ResourceObj

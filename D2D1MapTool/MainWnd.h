@@ -19,8 +19,20 @@ private:
 	ID2D1BitmapRenderTarget* m_brt;
 	HWND  m_scroll;
 	FLOAT m_magnification = 1.0f;
+	Bitmap* m_gameObjBitmap;
+
+
+	class GameObject* m_target;
+	class GameObject* m_player;
+	class GameObject* m_nefendes;
+	class GameObject* m_ghost;
+	class GameObject* m_kuma;
+
+
 private:
 	void GridRender();
+	void GameObjRender();
+	void GameObjGridRender(const D2D1_RECT_F& rect, enum EVENT_TYPE _type);
 	void ResourceLoad();	
 	void FileOpenProc();
 	void SaveFile();
@@ -28,6 +40,7 @@ private:
 	void EreaseRender();
 	void ClickEvent(int _x, int _y);
 	void EventHandler(class Event* _obj, const Pos& _pos);
+	void ObjHandler(class GameObject* _obj, const Pos& _pos);
 	Pos  GetMousePosXY(int _x, int _y);
 	Pos  GetMousePosXYMap(int _x, int _y);
 public:
@@ -45,5 +58,11 @@ public:
 	void					 Vscroll(WPARAM wParam, LPARAM lParam);
 	void					 MouseWheel(WPARAM wParam, LPARAM lParam);
 	void					 KeyDown(WPARAM _param);
+	Bitmap*					 BitmapGetInsert(char* _fileName);
+	void					 SetPlayerObject(GameObject* _obj) { m_player = _obj; }
+	void					 SetNefendesObject(GameObject* _obj) { m_nefendes = _obj; }
+	void					 SetGhostObject(GameObject* _obj) { m_ghost = _obj; }
+	void					 SetKumaObject(GameObject* _obj) { m_kuma = _obj; }
+	void					 Insert(char* _fileName);
 }
 ;

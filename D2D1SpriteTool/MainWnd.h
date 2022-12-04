@@ -21,6 +21,7 @@ public:
 	void KeyDown(WPARAM _param);
 	void ClearAnimation();
 	void SaveItem(ResourceObj* _obj);
+	void SaveGameObject(Sprite* _sprite);
 	void CreateBitmap(ResourceObj* _obj);
 private:
 	void FileOpenProc();

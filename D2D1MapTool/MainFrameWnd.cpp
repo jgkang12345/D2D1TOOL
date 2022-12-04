@@ -60,8 +60,8 @@ void MainFrameWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[],
 	int ScrollBarWidth = 15;
 
 	Controller::GetInstance()->SetMainFrameWnd(this);
-	m_treeViewWnd = new TreeViewWnd(m_instance, m_hwnd, L"SUB", L"JGSPRITETOOL", 0, 0, _width - (mainWidth), size.bottom - 50, 0);
 	m_mainWnd = new MainWnd(m_instance,m_hwnd, L"MAIN", L"JGSPRITETOOL", _width - (mainWidth), 0, mainWidth - ScrollBarWidth, size.bottom - 50, 0);
+	m_treeViewWnd = new TreeViewWnd(m_instance, m_hwnd, L"SUB", L"JGSPRITETOOL", 0, 0, _width - (mainWidth), size.bottom - 50, 0);
 
 	HWND y_scroll = CreateWindowEx(
 		0,

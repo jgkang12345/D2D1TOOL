@@ -6,6 +6,7 @@
 #include "Map.h"
 #include "TreeViewWnd.h"
 #include "Event.h"
+#include "GameObject.h"
 MainWnd::MainWnd(HINSTANCE _instance, const TCHAR _className[], const TCHAR _title[], DWORD _width, DWORD _height, int _ncmdShow)
 {
 	m_instance = _instance;
@@ -124,6 +125,12 @@ void MainWnd::Render()
 	if (m_gridState)
 		GridRender();
 
+
+	if (m_gameObjBitmap && m_target)
+		GameObjRender();
+
+
+
 	m_brt->SetTransform(D2D1::Matrix3x2F::Scale(D2D1::Size(m_magnification, m_magnification)));
 	m_brt->EndDraw();
 	m_brt->GetBitmap(&bitmap);
@@ -135,6 +142,7 @@ void MainWnd::Render()
 
 	m_rt->EndDraw();
 }
+
 
 BOOL MainWnd::NewMapDiallog(HWND hwndDig, UINT message, WPARAM wParam, LPARAM IParam)
 {
@@ -212,8 +220,11 @@ void MainWnd::GridUnSet()
 
 void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 {	
+	m_target = nullptr;
+
 	switch (_obj->GetResourceType())
 	{
+
 	case MAP:
 	{
 		EreaseRender();
@@ -252,7 +263,44 @@ void MainWnd::TreeViewClickEventBind(ResourceObj* _obj)
 
 	case EVENT:
 		break;
+
+
+	case GAME_OBJECT:
+	{
+		if (m_mapData == nullptr)
+			break;
+		GameObject* gameObj = reinterpret_cast<GameObject*>(_obj);
+		m_gameObjBitmap =  BitmapGetInsert(gameObj->GetFileName());
+		m_target = gameObj;
+		break;
+	}	
 	}
+}
+
+Bitmap* MainWnd::BitmapGetInsert(char* _fileName) 
+{
+	if (m_bitmapDB.find(_fileName) != m_bitmapDB.end())
+	{
+		return m_bitmapDB.find(_fileName)->second;
+	}
+	else
+	{
+		TCHAR szUniCode[256] = { 0, };
+		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, _fileName, strlen(_fileName), szUniCode, strlen(_fileName));
+		Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, szUniCode);
+		m_bitmapDB.insert({ _fileName, bitmap });
+		return bitmap;
+	}
+
+}
+
+void MainWnd::Insert(char* _fileName)
+{
+	TCHAR szUniCode[256] = { 0, };
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, _fileName, strlen(_fileName), szUniCode, strlen(_fileName));
+	Bitmap* bitmap = D2D1Core::GetInstance()->LoadBitmapByFileName(&m_rt, szUniCode);
+	m_bitmapDB.insert({ _fileName, bitmap });
+	m_gameObjBitmap = bitmap;
 }
 
 void MainWnd::MenuBind(int _menu)
@@ -501,9 +549,19 @@ void MainWnd::ClickEvent(int _x, int _y)
 	switch (rs->GetResourceType())
 	{
 	case EVENT:
+	{
 		Event* eventObject = reinterpret_cast<Event*>(rs);
 		EventHandler(eventObject, mapIndex);
 		break;
+	}
+
+	case GAME_OBJECT:
+	{
+		GameObject* gom = reinterpret_cast<GameObject*>(rs);
+		ObjHandler(gom, mapIndex);
+		break;
+	}
+
 	} 
 }
 
@@ -519,6 +577,29 @@ void MainWnd::EventHandler(Event* _eventObj, const Pos& _pos)
 		m_mapData[_pos.y][_pos.x] = WALL;
 		break;
 	} 
+}
+
+void MainWnd::ObjHandler(GameObject* _obj, const Pos& _pos)
+{
+	switch (_obj->GetObjCode())
+	{
+	case ObjectType::PlayerObj: 
+		m_mapData[_pos.y][_pos.x] = Player;
+		break;
+
+	case ObjectType::NefendesObj: 
+		m_mapData[_pos.y][_pos.x] = Nefendes;
+		break;
+
+	case ObjectType::GhostObj: 
+		m_mapData[_pos.y][_pos.x] = Ghost;
+		break;
+
+	case ObjectType::KumaObj: 
+		m_mapData[_pos.y][_pos.x] = Kuma;
+		break;
+
+	}
 }
 
 void MainWnd::GridRender()
@@ -541,10 +622,86 @@ void MainWnd::GridRender()
 			case WALL:
 				m_brt->FillRectangle(rect, m_brush1);
 				break;
+
+			case Player:
+				GameObjGridRender(rect, Player);
+				break;
+
+			case Nefendes:
+				GameObjGridRender(rect, Nefendes);
+				break;
+		
+			case Ghost:
+				GameObjGridRender(rect, Ghost);
+				break;
+
+			case Kuma:
+				GameObjGridRender(rect, Kuma);
+				break;
 			}
 			m_brt->DrawRectangle(rect, m_brush);
 		}
 	}
+}
+
+void MainWnd::GameObjRender()
+{
+	int left = ((m_endMousePosX / m_magnification)- abs(m_target->GetPivotPos().x - m_target->GetXPos())) ;
+	int right = ((m_endMousePosX / m_magnification) + abs(m_target->GetPivotPos().x - m_target->GetWidth())) ;
+	int top = ((m_endMousePosY / m_magnification)- abs(m_target->GetPivotPos().y - m_target->GetYPos())) ;
+	int bottom = ((m_endMousePosY / m_magnification)+ abs(m_target->GetPivotPos().y - m_target->GetHeight())) ;
+
+	int s_left = m_target->GetXPos() ;
+	int s_top = m_target->GetYPos() ;
+	int s_right = m_target->GetWidth() ;
+	int s_bttom = m_target->GetHeight() ;
+
+	D2D1_RECT_F dest = { left, top, right, bottom };
+	D2D1_RECT_F source = { s_left, s_top, s_right, s_bttom };
+	m_brt->DrawBitmap(m_gameObjBitmap->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
+}
+
+void MainWnd::GameObjGridRender(const D2D1_RECT_F& rect, EVENT_TYPE _type)
+{
+	GameObject* temp = nullptr;
+	switch (_type)
+	{
+	case EMPTY:
+		break;
+	case WALL:
+		break;
+	case Player:
+		temp = m_player;
+		break;
+	case Nefendes:
+		temp = m_nefendes;
+		break;
+	case Ghost:
+		temp = m_ghost;
+		break;
+	case Kuma:
+		temp = m_kuma;
+		break;
+	default:
+		break;
+	}
+
+	int startPosX = (((rect.right - rect.left) / 2) + rect.left);
+	int startPosY = rect.bottom;
+
+	int left = ((startPosX)-abs(temp->GetPivotPos().x - temp->GetXPos()));
+	int right = ((startPosX)+abs(temp->GetPivotPos().x - temp->GetWidth()));
+	int top = ((startPosY)-abs(temp->GetPivotPos().y - temp->GetYPos()));
+	int bottom = ((startPosY)+abs(temp->GetPivotPos().y - temp->GetHeight()));
+
+	int s_left = temp->GetXPos();
+	int s_top = temp->GetYPos();
+	int s_right = temp->GetWidth();
+	int s_bttom = temp->GetHeight();
+
+	D2D1_RECT_F dest = { left, top, right, bottom };
+	D2D1_RECT_F source = { s_left, s_top, s_right, s_bttom };
+	m_brt->DrawBitmap(BitmapGetInsert(temp->GetFileName())->GetBitmap(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
 }
 
 void MainWnd::ResourceLoad()
@@ -670,6 +827,8 @@ LRESULT MainWnd::DisPatch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	case WM_MOUSEMOVE:
+		m_endMousePosX = LOWORD(lParam);
+		m_endMousePosY = HIWORD(lParam);
 		break;
 
 	case WM_LBUTTONUP:

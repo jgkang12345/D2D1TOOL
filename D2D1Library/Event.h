@@ -2,9 +2,12 @@
 enum EVENT_TYPE : int
 {
 	EMPTY = 0,
-	WALL = 1
+	WALL = 1,
+	Player = 2,
+	Nefendes = 3,
+	Ghost = 4,
+	Kuma = 5
 };
-
 class Event : public ResourceObj
 {
 private:

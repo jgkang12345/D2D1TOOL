@@ -6,6 +6,7 @@
 #include "Controller.h"
 #include "Map.h"
 #include "Event.h"
+#include "GameObject.h"
 #pragma comment(lib,"Comctl32.lib")
 
 TreeViewWnd::TreeViewWnd(HINSTANCE _instance, HWND _parent, const TCHAR _className[], const TCHAR _title[], int _x, int _y, DWORD _width, DWORD _height, int _ncmdShow)
@@ -108,7 +109,8 @@ void TreeViewWnd::CreateWnd(const TCHAR _className[], const TCHAR _titleName[], 
 		}
 		else if (0 == _tcscmp(exp, _T("obj")))
 		{
-			AddItemToTree(0, (LPTSTR)fileName, m_objectRoot, TVI_LAST, NULL);
+			// AddItemToTree(0, (LPTSTR)fileName, m_objectRoot, TVI_LAST, NULL);
+			LoadGameObjectData(fileName);
 		}
 	}
 	for (int i = 0; i < spriteFiles.size(); i++)
@@ -153,6 +155,44 @@ void TreeViewWnd::LoadMapData(TCHAR* _fileName)
 		{
 			Map* map = new Map(*file);
 			AddItemToTree(0, (LPTSTR)_fileName, m_mapRoot, TVI_LAST, (LPARAM)map);
+		}
+		delete file;
+	}
+}
+
+void TreeViewWnd::LoadGameObjectData(TCHAR* _fileName)
+{
+	FILE* p_file = NULL;
+	char path[256] = "";
+	WideCharToMultiByte(CP_ACP, 0, _fileName, 256, path, 256, NULL, NULL);
+	fopen_s(&p_file, path, "rb");
+	if (p_file != NULL)
+	{
+		ObjDataBinaryFile* file = new ObjDataBinaryFile;
+		fread(file, sizeof(ObjDataBinaryFile), 1, p_file);
+		if (file)
+		{
+			GameObject* obj = new GameObject(*file);
+			Controller::GetInstance()->GetMainWnd()->BitmapGetInsert(obj->GetFileName());
+			AddItemToTree(0, (LPTSTR)_fileName, m_objectRoot, TVI_LAST, (LPARAM)obj);
+			switch (obj->GetObjCode())
+			{
+			case ObjectType::PlayerObj:
+				Controller::GetInstance()->GetMainWnd()->SetPlayerObject(obj);
+				break;
+			
+			case ObjectType::NefendesObj:
+				Controller::GetInstance()->GetMainWnd()->SetNefendesObject(obj);
+				break;
+			
+			case ObjectType::GhostObj:
+				Controller::GetInstance()->GetMainWnd()->SetGhostObject(obj);
+				break;
+			
+			case ObjectType::KumaObj:
+				Controller::GetInstance()->GetMainWnd()->SetKumaObject(obj);
+				break;
+			}
 		}
 		delete file;
 	}

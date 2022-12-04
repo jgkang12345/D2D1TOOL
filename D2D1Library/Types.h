@@ -43,5 +43,14 @@ struct ObjDataBinaryFile
 	int  yPos;
 	int  width;
 	int  height;
+	D2D1_POINT_2F pivotPos;
 	int  objectCode;
+};
+
+enum ObjectType : int 
+{
+	PlayerObj = 100,
+	NefendesObj = 200,
+	GhostObj = 300,
+	KumaObj = 400
 };

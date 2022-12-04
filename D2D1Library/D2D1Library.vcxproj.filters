@@ -48,6 +48,9 @@
     <ClCompile Include="Event.cpp">
       <Filter>D2D1</Filter>
     </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>D2D1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -87,6 +90,9 @@
       <Filter>D2D1</Filter>
     </ClInclude>
     <ClInclude Include="Event.h">
+      <Filter>D2D1</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
       <Filter>D2D1</Filter>
     </ClInclude>
   </ItemGroup>

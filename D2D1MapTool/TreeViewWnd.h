@@ -13,6 +13,7 @@ public:
 	HWND		GetTreeViewHwnd() { return m_treeviewHwnd; }
 	HTREEITEM   GetCusorSel();
 	void		LoadMapData(TCHAR* _fileName);
+	void		LoadGameObjectData(TCHAR* _fileName);
 private:
 	HWND	m_treeviewHwnd;
 	HTREEITEM m_spriteRoot;
