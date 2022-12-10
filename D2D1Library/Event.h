@@ -6,7 +6,8 @@ enum EVENT_TYPE : int
 	Player = 2,
 	Nefendes = 3,
 	Ghost = 4,
-	Kuma = 5
+	Kuma = 5,
+	NefendesRect = 6
 };
 class Event : public ResourceObj
 {

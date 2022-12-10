@@ -41,6 +41,7 @@ private:
 	void ClickEvent(int _x, int _y);
 	void EventHandler(class Event* _obj, const Pos& _pos);
 	void ObjHandler(class GameObject* _obj, const Pos& _pos);
+	void ObjHandler(EVENT_TYPE _type, const Pos& _pos);
 	Pos  GetMousePosXY(int _x, int _y);
 	Pos  GetMousePosXYMap(int _x, int _y);
 public:

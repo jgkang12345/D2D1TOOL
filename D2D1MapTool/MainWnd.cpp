@@ -558,7 +558,33 @@ void MainWnd::ClickEvent(int _x, int _y)
 	case GAME_OBJECT:
 	{
 		GameObject* gom = reinterpret_cast<GameObject*>(rs);
-		ObjHandler(gom, mapIndex);
+		const int len = ( gom->GetWidth() - gom->GetXPos() ) / 2;
+		Pos mapLeft = GetMousePosXYMap(_x - len, _y);
+		Pos mapRight = GetMousePosXYMap(_x + len, _y);
+
+
+		switch (gom->GetObjCode())
+		{
+		case ObjectType::PlayerObj:
+			m_mapData[mapIndex.y][mapIndex.x] = Player;
+			break;
+
+		case ObjectType::NefendesObj:
+			m_mapData[mapIndex.y][mapIndex.x] = Nefendes;
+			for (int i = mapLeft.x; i <= mapRight.x; i++)
+				if (mapIndex.x != i)
+					m_mapData[mapIndex.y][i] = NefendesRect;
+			break;
+
+		case ObjectType::GhostObj:
+			m_mapData[mapIndex.y][mapIndex.x] = Ghost;
+			break;
+
+		case ObjectType::KumaObj:
+			m_mapData[mapIndex.y][mapIndex.x] = Kuma;
+			break;
+
+		}
 		break;
 	}
 
@@ -600,6 +626,12 @@ void MainWnd::ObjHandler(GameObject* _obj, const Pos& _pos)
 		break;
 
 	}
+}
+
+void MainWnd::ObjHandler(EVENT_TYPE _type, const Pos& _pos)
+{
+	if (m_mapData[_pos.y][_pos.x] == EMPTY)
+		m_mapData[_pos.y][_pos.x] = _type;
 }
 
 void MainWnd::GridRender()
