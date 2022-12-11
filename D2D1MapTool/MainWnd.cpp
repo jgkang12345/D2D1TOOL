@@ -578,6 +578,9 @@ void MainWnd::ClickEvent(int _x, int _y)
 
 		case ObjectType::GhostObj:
 			m_mapData[mapIndex.y][mapIndex.x] = Ghost;
+			for (int i = mapLeft.x; i <= mapRight.x; i++)
+				if (mapIndex.x != i)
+					m_mapData[mapIndex.y][i] = GhostRect;
 			break;
 
 		case ObjectType::KumaObj:

@@ -1020,7 +1020,7 @@ void MainWnd::BFS(Pos _pos)
 		{
 			Pos next = { now.x + moveX[dir], now.y + moveY[dir] };
 
-			if (next.x < 0 || next.y < 0 || next.x > m_bitmap->GetWidht() || next.y > m_bitmap->GetHeight())
+			if (next.x < 0 || next.y < 0 || next.x >= m_bitmap->GetWidht() || next.y >= m_bitmap->GetHeight())
 				continue;
 
 			if (m_discovered[next.y][next.x])
